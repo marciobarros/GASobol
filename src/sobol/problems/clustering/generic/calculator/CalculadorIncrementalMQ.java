@@ -12,7 +12,6 @@ public class CalculadorIncrementalMQ
 	private int[] packageIntraEdges;
 	private int[] originalPackage;
 	private int[] newPackage;
-	private double[] mq;
 
 	public CalculadorIncrementalMQ(Project project, int packageCount)
 	{
@@ -24,9 +23,7 @@ public class CalculadorIncrementalMQ
 		
 		preparePackages(project);
 		prepareClassDependencies(project);
-
-		this.mq = new double[packageCount];
-		prepareMQ();
+		preparePackageDependencies();
 	}
 	
 	private void preparePackages(Project project)
@@ -72,7 +69,25 @@ public class CalculadorIncrementalMQ
 		}
 
 		for (int i = 0; i < classCount; i++)
-			addClassInfluence(i);
+		{
+			int sourcePackage = newPackage[i];
+			
+			for (int j = 0; j < classCount; j++)
+			{
+				if (classEdges[i][j] > 0)
+				{
+					int targetPackage = newPackage[j];
+					
+					if (targetPackage != sourcePackage)
+					{
+						packageInterEdges[sourcePackage]++;
+						packageInterEdges[targetPackage]++;
+					}
+					else
+						packageIntraEdges[sourcePackage]++;
+				}
+			}
+		}
 	}
 	
 	private void addClassInfluence(int classIndex)
@@ -93,10 +108,23 @@ public class CalculadorIncrementalMQ
 				else
 					packageIntraEdges[sourcePackage]++;
 			}
+
+			if (classEdges[i][classIndex] > 0)
+			{
+				int targetPackage = newPackage[i];
+				
+				if (targetPackage != sourcePackage)
+				{
+					packageInterEdges[sourcePackage]++;
+					packageInterEdges[targetPackage]++;
+				}
+				else
+					packageIntraEdges[sourcePackage]++;
+			}
 		}
 	}
 	
-	private void removeClassInfluence(int classIndex)
+	public void removeClassInfluence(int classIndex)
 	{
 		int sourcePackage = newPackage[classIndex];
 		
@@ -128,14 +156,6 @@ public class CalculadorIncrementalMQ
 		}
 	}
 	
-	private void prepareMQ()
-	{
-		preparePackageDependencies();
-
-		for (int i = 0; i < packageCount; i++)
-			mq[i] = calculateModularizationFactor(i);
-	}
-	
 	private double calculateModularizationFactor(int packageIndex)
 	{
 		int inter = packageInterEdges[packageIndex];
@@ -156,10 +176,6 @@ public class CalculadorIncrementalMQ
 			removeClassInfluence(classIndex);
 			newPackage[classIndex] = packageIndex;
 			addClassInfluence(classIndex);
-			//preparePackageDependencies();
-			
-			mq[actualPackage] = calculateModularizationFactor(actualPackage);
-			mq[packageIndex] = calculateModularizationFactor(packageIndex);
 		}
 	}
 	
@@ -168,7 +184,7 @@ public class CalculadorIncrementalMQ
 		for (int i = 0; i < classCount; i++)
 			newPackage[i] = packageIndexes[i];
 		
-		prepareMQ();
+		preparePackageDependencies();
 	}
 	
 	public double calculateModularizarionFactor()
@@ -176,7 +192,7 @@ public class CalculadorIncrementalMQ
 		double result = 0.0;
 		
 		for (int i = 0; i < packageCount; i++)
-			result += mq[i];
+			result += calculateModularizationFactor(i);
 		
 		return result;
 	}

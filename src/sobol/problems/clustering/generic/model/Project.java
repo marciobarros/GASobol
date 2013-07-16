@@ -146,6 +146,16 @@ public class Project
 	}
 	
 	/**
+	 * Adiciona uma classe no projeto
+	 */
+	public ProjectClass addClass(String name, ProjectPackage _package)
+	{
+		ProjectClass c = new ProjectClass(name, _package);
+		classes.add(c);
+		return c;
+	}
+	
+	/**
 	 * Remove uma classe do projeto, dado seu índice
 	 */
 	public void removeClass(int index)

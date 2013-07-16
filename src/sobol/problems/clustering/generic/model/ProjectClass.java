@@ -113,19 +113,21 @@ public class ProjectClass
 	/**
 	 * Adiciona uma dependência na classe
 	 */
-	public void addDependency(String elementName, DependencyType type)
+	public ProjectClass addDependency(String elementName, DependencyType type)
 	{
 		Dependency dependency = new Dependency(elementName, type);
 		dependencies.add(dependency);
+		return this;
 	}
 	
 	/**
 	 * Adiciona uma dependência na classe
 	 */
-	public void addDependency(String elementName)
+	public ProjectClass addDependency(String elementName)
 	{
 		Dependency dependency = new Dependency(elementName, DependencyType.USES);
 		dependencies.add(dependency);
+		return this;
 	}
 	
 	/**
