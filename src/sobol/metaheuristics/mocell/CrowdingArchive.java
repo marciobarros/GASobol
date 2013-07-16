@@ -17,6 +17,8 @@ import sobol.metaheuristics.nsgaII.Distance;
  */
 public class CrowdingArchive extends Archive
 {
+	private static final long serialVersionUID = -6611611977442062539L;
+
 	/**
 	 * Stores the maximum size of the archive.
 	 */

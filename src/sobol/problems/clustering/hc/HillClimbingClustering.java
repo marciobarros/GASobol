@@ -1,10 +1,11 @@
 package sobol.problems.clustering.hc;
 
 import java.io.PrintWriter;
+
 import sobol.base.random.RandomGeneratorFactory;
 import sobol.base.random.generic.AbstractRandomGenerator;
 import sobol.base.random.pseudo.PseudoRandomGeneratorFactory;
-import sobol.problems.clustering.generic.calculator.ClusteringCalculator;
+import sobol.problems.clustering.generic.calculator.CalculadorIncrementalMQ;
 import sobol.problems.clustering.generic.model.Project;
 
 /**
@@ -47,7 +48,7 @@ public class HillClimbingClustering
 	/**
 	 * Calculator used in the search process
 	 */
-	private ClusteringCalculator calculator;
+	private CalculadorIncrementalMQ calculator;
 
 	/**
 	 * Number of classes in the project under evaluation
@@ -80,12 +81,12 @@ public class HillClimbingClustering
 	{
 		this.classCount = project.getClassCount();
 		this.packageCount = classCount;
-		this.calculator = new ClusteringCalculator(project, packageCount);
+		this.calculator = new CalculadorIncrementalMQ(project, packageCount);
 		this.maxEvaluations = maxEvaluations;
 		this.detailsFile = detailsFile;
 		
-		//createDefaultSelectionOrder(project);
-		createRandomSelectionOrder(project);
+		createDefaultSelectionOrder(project);
+		//createRandomSelectionOrder(project);
 
 		this.evaluations = 0;
 		this.randomRestartCount = 0;
@@ -208,20 +209,11 @@ public class HillClimbingClustering
 	}
 
 	/**
-	 * Applies a solution to the clustering calculator
-	 */
-	private void applySolution(int[] solution)
-	{
-		for (int i = 0; i < classCount; i++)
-			calculator.moveClass(i, solution[i]);
-	}
-
-	/**
 	 * Evaluates the fitness of a solution, saving detail information
 	 */
 	private double evaluate()
 	{
-		double fit = calculator.calculateEVM();
+		double fit = calculator.calculateModularizarionFactor();
 
 		if (++evaluations % 10000 == 0 && detailsFile != null)
 			detailsFile.println(evaluations + "; " + fitness);
@@ -234,7 +226,7 @@ public class HillClimbingClustering
 	 */
 	private NeighborhoodVisitorResult visitNeighbors(int[] solution)
 	{
-		applySolution(solution);
+		this.calculator.moveAll(solution);
 		double startingFitness = evaluate();
 
 		if (evaluations > maxEvaluations)
@@ -303,7 +295,7 @@ public class HillClimbingClustering
 		AbstractRandomGenerator random = RandomGeneratorFactory.createForPopulation(classCount);
 
 		this.bestSolution = random.randInt(0, packageCount - 1);
-		applySolution(bestSolution);
+		this.calculator.moveAll(bestSolution);
 		this.fitness = evaluate();
 
 		int[] solution = new int[classCount];

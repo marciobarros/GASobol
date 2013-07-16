@@ -19,7 +19,7 @@ public class MainProgram
 		"data\\cluster\\apache_zip 36C.odem",
 		"data\\cluster\\udtjava 56C.odem",
 		"data\\cluster\\javaocr 59C.odem",
-		"data\\cluster\\pfcda_base 67C.odem",
+		/*"data\\cluster\\pfcda_base 67C.odem",
 		"data\\cluster\\forms 68C.odem",
  		"data\\cluster\\servletapi 74C.odem",
 		"data\\cluster\\jscatterplot 74C.odem",
@@ -44,7 +44,7 @@ public class MainProgram
 		"data\\cluster\\pfcda_swing 252C.odem",
 		"data\\cluster\\jpassword 269C.odem",
 		"data\\cluster\\jml 270C.odem",
-		"data\\cluster\\notepad_full 299C.odem",
+		"data\\cluster\\notepad_full 299C.odem",*/
 		/*"data\\cluster\\poormans 304C.odem",
 		"data\\cluster\\log4j 308C.odem",
 		"data\\cluster\\jtreeview 329C.odem",
@@ -115,7 +115,7 @@ public class MainProgram
 		{
 			Project instance = instances.elementAt(i);
 			RandomGeneratorFactory.setRandomFactoryForPopulation(new SobolRandomGeneratorFactory());
-			mp.runInstance(out, details, "SOBOL", instance, 30, 2000);
+			mp.runInstance(out, details, "SOBOL", instance, 1, 2000);
 		}
 		
 		out.close();

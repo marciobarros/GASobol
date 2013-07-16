@@ -18,6 +18,8 @@ import java.util.List;
  */
 public class SolutionSet implements Serializable
 {
+	private static final long serialVersionUID = 7412358376942363779L;
+	
 	protected List<Solution> solutionsList_;
 	private int capacity_ = 0;
 

@@ -19,6 +19,8 @@ import sobol.base.solution.SolutionSet;
  */
 public class NonDominatedSolutionList extends SolutionSet
 {
+	private static final long serialVersionUID = 2499039751150527555L;
+
 	/**
 	 * Stores a <code>Comparator</code> for dominance checking
 	 */
