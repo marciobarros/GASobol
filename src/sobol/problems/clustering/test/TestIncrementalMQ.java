@@ -5,7 +5,7 @@ import sobol.problems.clustering.generic.calculator.CalculadorIncrementalMQ;
 import sobol.problems.clustering.generic.model.Project;
 import sobol.problems.clustering.generic.model.ProjectPackage;
 
-public class TestIncremental extends TestCase
+public class TestIncrementalMQ extends TestCase
 {
 	public void testBasico()
 	{
@@ -24,8 +24,8 @@ public class TestIncremental extends TestCase
 		project.addClass("c3.2", p3).addDependency("c3.1");
 		
 		CalculadorIncrementalMQ cc = new CalculadorIncrementalMQ(project, 3);
-		cc.calculateModularizarionQuality();
+		cc.evaluate();
 		cc.removeClassInfluence(5);
-		cc.calculateModularizarionQuality();
+		cc.evaluate();
 	}
 }

@@ -1,11 +1,10 @@
 package sobol.problems.clustering.hc;
 
 import java.io.PrintWriter;
-
 import sobol.base.random.RandomGeneratorFactory;
 import sobol.base.random.generic.AbstractRandomGenerator;
 import sobol.base.random.pseudo.PseudoRandomGeneratorFactory;
-import sobol.problems.clustering.generic.calculator.CalculadorIncrementalMQ;
+import sobol.problems.clustering.generic.calculator.ICalculadorIncremental;
 import sobol.problems.clustering.generic.model.Project;
 
 /**
@@ -48,7 +47,7 @@ public class HillClimbingClustering
 	/**
 	 * Calculator used in the search process
 	 */
-	private CalculadorIncrementalMQ calculator;
+	private ICalculadorIncremental calculator;
 
 	/**
 	 * Number of classes in the project under evaluation
@@ -77,11 +76,11 @@ public class HillClimbingClustering
 	 * @param project Project whose classes will be distributed into clusters
 	 * @param maxEvaluations Budget of fitness evaluations
 	 */
-	public HillClimbingClustering(PrintWriter detailsFile, Project project, int maxEvaluations) throws Exception
+	public HillClimbingClustering(PrintWriter detailsFile, ICalculadorIncremental calculador, Project project, int maxEvaluations) throws Exception
 	{
 		this.classCount = project.getClassCount();
 		this.packageCount = classCount;
-		this.calculator = new CalculadorIncrementalMQ(project, packageCount);
+		this.calculator = calculador;
 		this.maxEvaluations = maxEvaluations;
 		this.detailsFile = detailsFile;
 		
@@ -99,9 +98,9 @@ public class HillClimbingClustering
 	 * @param project Project whose classes will be distributed into clusters
 	 * @param maxEvaluations Budget of fitness evaluations
 	 */
-	public HillClimbingClustering(Project project, int maxEvaluations) throws Exception
+	public HillClimbingClustering(ICalculadorIncremental calculador, Project project, int maxEvaluations) throws Exception
 	{
-		this(null, project, maxEvaluations);
+		this(null, calculador, project, maxEvaluations);
 	}
 
 	/**
@@ -213,7 +212,7 @@ public class HillClimbingClustering
 	 */
 	private double evaluate()
 	{
-		double fit = calculator.calculateModularizarionQuality();
+		double fit = calculator.evaluate();
 
 		if (++evaluations % 10000 == 0 && detailsFile != null)
 			detailsFile.println(evaluations + "; " + fitness);

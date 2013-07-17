@@ -6,6 +6,8 @@ import java.util.Vector;
 import javax.management.modelmbean.XMLParseException;
 import sobol.base.random.RandomGeneratorFactory;
 import sobol.base.random.sobol.SobolRandomGeneratorFactory;
+import sobol.problems.clustering.generic.calculator.CalculadorIncrementalEVM;
+import sobol.problems.clustering.generic.calculator.ICalculadorIncremental;
 import sobol.problems.clustering.generic.model.Project;
 import sobol.problems.clustering.generic.reader.CDAReader;
 
@@ -29,7 +31,7 @@ public class MainProgram
 		"data\\cluster\\junit 100C.odem",
 		"data\\cluster\\xmldom 119C.odem",
 		"data\\cluster\\tinytim 134C.odem",
-		"data\\cluster\\jkaryoscope 136C.odem",
+		/*"data\\cluster\\jkaryoscope 136C.odem",
 		"data\\cluster\\gae_core 140C.odem",
 		"data\\cluster\\javacc 154C.odem",
 		"data\\cluster\\javageom 172C.odem",
@@ -44,7 +46,7 @@ public class MainProgram
 		"data\\cluster\\pfcda_swing 252C.odem",
 		"data\\cluster\\jpassword 269C.odem",
 		"data\\cluster\\jml 270C.odem",
-		"data\\cluster\\notepad_full 299C.odem",
+		"data\\cluster\\notepad_full 299C.odem",*/
 		/*"data\\cluster\\poormans 304C.odem",
 		"data\\cluster\\log4j 308C.odem",
 		"data\\cluster\\jtreeview 329C.odem",
@@ -79,12 +81,12 @@ public class MainProgram
 		return instances;
 	}
 	
-	private void runInstance(PrintWriter out, PrintWriter details, String tipo, Project instance, int cycles, int popSize) throws Exception
+	private void runInstance(PrintWriter out, PrintWriter details, ICalculadorIncremental calculador, String tipo, Project instance, int cycles, int popSize) throws Exception
 	{
 		for (int i = 0; i < cycles; i++)
 		{
 			int maxEvaluations = popSize * instance.getClassCount() * instance.getClassCount();
-			HillClimbingClustering hcc = new HillClimbingClustering(details, instance, maxEvaluations);
+			HillClimbingClustering hcc = new HillClimbingClustering(details, calculador, instance, maxEvaluations);
 			
 			long initTime = System.currentTimeMillis();
 			details.println(tipo + " " + instance.getName() + " #" + cycles);
@@ -113,9 +115,10 @@ public class MainProgram
 		
 		for (int i = 0; i < instances.size(); i++)
 		{
-			Project instance = instances.elementAt(i);
+			Project projeto = instances.elementAt(i);
+			ICalculadorIncremental calculador = new CalculadorIncrementalEVM(projeto, projeto.getClassCount());
 			RandomGeneratorFactory.setRandomFactoryForPopulation(new SobolRandomGeneratorFactory());
-			mp.runInstance(out, details, "SOBOL", instance, 1, 2000);
+			mp.runInstance(out, details, calculador, "SOBOL", projeto, 1, 2000);
 		}
 		
 		out.close();

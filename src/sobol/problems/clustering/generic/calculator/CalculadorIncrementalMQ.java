@@ -8,7 +8,7 @@ import sobol.problems.clustering.generic.model.ProjectClass;
  * 
  * @author marcio.barros
  */
-public class CalculadorIncrementalMQ
+public class CalculadorIncrementalMQ implements ICalculadorIncremental
 {
 	/**
 	 * Número de classes no problema
@@ -250,6 +250,7 @@ public class CalculadorIncrementalMQ
 	/**
 	 * Move uma classe para outro pacote
 	 */
+	@Override
 	public void moveClass(int classIndex, int packageIndex)
 	{
 		int actualPackage = newPackage[classIndex];
@@ -265,6 +266,7 @@ public class CalculadorIncrementalMQ
 	/**
 	 * Move todas as classes para um novo conjunto de pacotes
 	 */
+	@Override
 	public void moveAll(int[] packageIndexes)
 	{
 		for (int i = 0; i < classCount; i++)
@@ -276,7 +278,8 @@ public class CalculadorIncrementalMQ
 	/**
 	 * Calcula o valor do MQ para a distribuição atual de classes em pacotes
 	 */
-	public double calculateModularizarionQuality()
+	@Override
+	public double evaluate()
 	{
 		double result = 0.0;
 		

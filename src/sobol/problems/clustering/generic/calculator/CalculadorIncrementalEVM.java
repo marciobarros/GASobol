@@ -8,7 +8,7 @@ import sobol.problems.clustering.generic.model.ProjectClass;
  * 
  * @author marcio.barros
  */
-public class CalculadorIncrementalEVM
+public class CalculadorIncrementalEVM implements ICalculadorIncremental
 {
 	/**
 	 * Número de classes no problema
@@ -26,19 +26,14 @@ public class CalculadorIncrementalEVM
 	private int[][] classEdges;
 
 	/**
-	 * Lista de classes que prestam serviços para uma classe índice 
+	 * Lista de classes com quem uma classe está associada 
 	 */
-	private int[][] classDependsOn;
-
-	/**
-	 * Lista de classes que utilizam serviços da classe índice
-	 */
-	private int[][] classProvidesTo;
+	private int[][] classAssociations;
 	
 	/**
-	 * Número de arestas externas de cada pacote
+	 * Número de classes em cada pacote
 	 */
-	private int[] packageInterEdges;
+	private int[] packageClassCount;
 
 	/**
 	 * Número de arestas internas de cada pacote
@@ -58,14 +53,15 @@ public class CalculadorIncrementalEVM
 		this.classCount = project.getClassCount();
 		this.packageCount = packageCount;
 
-		this.packageInterEdges = new int[packageCount];
 		this.packageIntraEdges = new int[packageCount];
+		this.packageClassCount = new int[packageCount];
 		
 		prepareClassPackages(project);
 		prepareClassDependencies(project);
-		prepareClassProviders();
-		prepareClassClients();
-		preparePackageDependencies();
+		prepareClassAssociations();
+		
+		preparePackageClasses();
+		preparePackageAssociations();
 	}
 	
 	/**
@@ -108,11 +104,11 @@ public class CalculadorIncrementalEVM
 	}
 
 	/**
-	 * Monta a lista de classes que oferecem serviços para a classe índice
+	 * Monta a lista de classes associadas a uma classe
 	 */
-	private void prepareClassProviders()
+	private void prepareClassAssociations()
 	{
-		this.classDependsOn = new int[classCount][classCount+1];
+		this.classAssociations = new int[classCount][classCount+1];
 		
 		for (int i = 0; i < classCount; i++)
 		{
@@ -120,58 +116,47 @@ public class CalculadorIncrementalEVM
 			
 			for (int j = 0; j < classCount; j++)
 			{
-				if (classEdges[i][j] > 0)
-					classDependsOn[i][walker++] = j;
+				if (classEdges[i][j] > 0 || classEdges[j][i] > 0)
+					classAssociations[i][walker++] = j;
 			}
-			
-			classDependsOn[i][walker] = -1;
+
+			classAssociations[i][walker] = -1;
 		}
 	}
 	
 	/**
-	 * Monta a lista de classes que utilizam serviços da classe índice
+	 * Calcula o número de classes de cada pacote
 	 */
-	private void prepareClassClients()
-	{
-		this.classProvidesTo = new int[classCount][classCount+1];
-		int[] walkers = new int[classCount];
-		
-		for (int i = 0; i < classCount; i++)
-		{
-			for (int j = 0; j < classCount; j++)
-			{
-				if (classEdges[i][j] > 0)
-					classProvidesTo[j][walkers[j]++] = i;
-			}
-		}
-		
-		for (int i = 0; i < classCount; i++)
-			classProvidesTo[i][walkers[i]] = -1;
-	}
-	
-	/**
-	 * Calcula o número de arestas internas e externas de cada pacote
-	 */
-	private void preparePackageDependencies()
+	private void preparePackageClasses()
 	{
 		for (int i = 0; i < packageCount; i++)
-			this.packageInterEdges[i] = this.packageIntraEdges[i] = 0;
+			this.packageClassCount[i] = 0;
 
 		for (int i = 0; i < classCount; i++)
 		{
 			int sourcePackage = newPackage[i];
+			this.packageClassCount[sourcePackage]++;
+		}
+	}
+	
+	/**
+	 * Calcula o número de arestas internas de cada pacote
+	 */
+	private void preparePackageAssociations()
+	{
+		for (int i = 0; i < packageCount; i++)
+			this.packageIntraEdges[i] = 0;
+
+		for (int i = 0; i < classCount; i++)
+		{
+			int sourcePackage = newPackage[i];			
 			int classIndex;
 			
-			for (int j = 0; (classIndex = classDependsOn[i][j]) >= 0; j++)
+			for (int j = 0; (classIndex = classAssociations[i][j]) >= 0; j++)
 			{
 				int targetPackage = newPackage[classIndex];
 				
-				if (targetPackage != sourcePackage)
-				{
-					packageInterEdges[sourcePackage]++;
-					packageInterEdges[targetPackage]++;
-				}
-				else
+				if (targetPackage == sourcePackage)
 					packageIntraEdges[sourcePackage]++;
 			}
 		}
@@ -183,31 +168,15 @@ public class CalculadorIncrementalEVM
 	private void addClassInfluence(int classIndex)
 	{
 		int sourcePackage = newPackage[classIndex];
+		this.packageClassCount[sourcePackage]++;
+
 		int secondClassIndex;
 		
-		for (int i = 0; (secondClassIndex = classDependsOn[classIndex][i]) >= 0; i++)
+		for (int i = 0; (secondClassIndex = classAssociations[classIndex][i]) >= 0; i++)
 		{
 			int targetPackage = newPackage[secondClassIndex];
 			
-			if (targetPackage != sourcePackage)
-			{
-				packageInterEdges[sourcePackage]++;
-				packageInterEdges[targetPackage]++;
-			}
-			else
-				packageIntraEdges[sourcePackage]++;
-		}
-		
-		for (int i = 0; (secondClassIndex = classProvidesTo[classIndex][i]) >= 0; i++)
-		{
-			int targetPackage = newPackage[secondClassIndex];
-			
-			if (targetPackage != sourcePackage)
-			{
-				packageInterEdges[sourcePackage]++;
-				packageInterEdges[targetPackage]++;
-			}
-			else
+			if (targetPackage == sourcePackage)
 				packageIntraEdges[sourcePackage]++;
 		}
 	}
@@ -218,31 +187,15 @@ public class CalculadorIncrementalEVM
 	public void removeClassInfluence(int classIndex)
 	{
 		int sourcePackage = newPackage[classIndex];
+		this.packageClassCount[sourcePackage]--;
+
 		int secondClassIndex;
 		
-		for (int i = 0; (secondClassIndex = classDependsOn[classIndex][i]) >= 0; i++)
+		for (int i = 0; (secondClassIndex = classAssociations[classIndex][i]) >= 0; i++)
 		{
 			int targetPackage = newPackage[secondClassIndex];
 
-			if (targetPackage != sourcePackage)
-			{
-				packageInterEdges[sourcePackage]--;
-				packageInterEdges[targetPackage]--;
-			}
-			else
-				packageIntraEdges[sourcePackage]--;
-		}
-		
-		for (int i = 0; (secondClassIndex = classProvidesTo[classIndex][i]) >= 0; i++)
-		{
-			int targetPackage = newPackage[secondClassIndex];
-
-			if (targetPackage != sourcePackage)
-			{
-				packageInterEdges[sourcePackage]--;
-				packageInterEdges[targetPackage]--;
-			}
-			else
+			if (targetPackage == sourcePackage)
 				packageIntraEdges[sourcePackage]--;
 		}
 	}
@@ -250,6 +203,7 @@ public class CalculadorIncrementalEVM
 	/**
 	 * Move uma classe para outro pacote
 	 */
+	@Override
 	public void moveClass(int classIndex, int packageIndex)
 	{
 		int actualPackage = newPackage[classIndex];
@@ -265,25 +219,29 @@ public class CalculadorIncrementalEVM
 	/**
 	 * Move todas as classes para um novo conjunto de pacotes
 	 */
+	@Override
 	public void moveAll(int[] packageIndexes)
 	{
 		for (int i = 0; i < classCount; i++)
 			newPackage[i] = packageIndexes[i];
 		
-		preparePackageDependencies();
+		preparePackageClasses();
+		preparePackageAssociations();
 	}
 	
 	/**
 	 * Calcula o valor do EVM para a distribuição atual de classes em pacotes
 	 */
-	public double calculateEVM()
+	@Override
+	public double evaluate()
 	{
 		double result = 0.0;
 		
 		for (int i = 0; i < packageCount; i++)
 		{
-			// TODO implementar - tv seja útil guardar o número de classes por pacote, acho que não precisa de interedges
-			result += 0.0;
+			int nc = packageClassCount[i];
+			int nl = packageIntraEdges[i] / 2;
+			result += 4 * nl - nc * (nc - 1);
 		}
 		
 		return result;
