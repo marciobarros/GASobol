@@ -24,8 +24,8 @@ public class TestIncremental extends TestCase
 		project.addClass("c3.2", p3).addDependency("c3.1");
 		
 		CalculadorIncrementalMQ cc = new CalculadorIncrementalMQ(project, 3);
-		cc.calculateModularizarionFactor();
+		cc.calculateModularizarionQuality();
 		cc.removeClassInfluence(5);
-		cc.calculateModularizarionFactor();
+		cc.calculateModularizarionQuality();
 	}
 }

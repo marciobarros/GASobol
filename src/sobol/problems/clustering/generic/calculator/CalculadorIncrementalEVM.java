@@ -4,11 +4,11 @@ import sobol.problems.clustering.generic.model.Project;
 import sobol.problems.clustering.generic.model.ProjectClass;
 
 /**
- * Classe que calcula o MQ de forma incremental para a otimização baseada em um ponto
+ * Classe que calcula o EVM de forma incremental para a otimização baseada em um ponto
  * 
  * @author marcio.barros
  */
-public class CalculadorIncrementalMQ
+public class CalculadorIncrementalEVM
 {
 	/**
 	 * Número de classes no problema
@@ -53,7 +53,7 @@ public class CalculadorIncrementalMQ
 	/**
 	 * Inicializa o calculador incremental
 	 */
-	public CalculadorIncrementalMQ(Project project, int packageCount)
+	public CalculadorIncrementalEVM(Project project, int packageCount)
 	{
 		this.classCount = project.getClassCount();
 		this.packageCount = packageCount;
@@ -274,18 +274,16 @@ public class CalculadorIncrementalMQ
 	}
 	
 	/**
-	 * Calcula o valor do MQ para a distribuição atual de classes em pacotes
+	 * Calcula o valor do EVM para a distribuição atual de classes em pacotes
 	 */
-	public double calculateModularizarionQuality()
+	public double calculateEVM()
 	{
 		double result = 0.0;
 		
 		for (int i = 0; i < packageCount; i++)
 		{
-			int inter = packageInterEdges[i];
-			int intra = packageIntraEdges[i];
-			double mf = (intra != 0 && inter != 0) ? intra / (intra + 0.5 * inter) : 0.0;
-			result += mf;
+			// TODO implementar - tv seja útil guardar o número de classes por pacote, acho que não precisa de interedges
+			result += 0.0;
 		}
 		
 		return result;

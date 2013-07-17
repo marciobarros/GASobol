@@ -29,7 +29,7 @@ public class MainProgram
 		"data\\cluster\\junit 100C.odem",
 		"data\\cluster\\xmldom 119C.odem",
 		"data\\cluster\\tinytim 134C.odem",
-		/*"data\\cluster\\jkaryoscope 136C.odem",
+		"data\\cluster\\jkaryoscope 136C.odem",
 		"data\\cluster\\gae_core 140C.odem",
 		"data\\cluster\\javacc 154C.odem",
 		"data\\cluster\\javageom 172C.odem",
@@ -44,7 +44,7 @@ public class MainProgram
 		"data\\cluster\\pfcda_swing 252C.odem",
 		"data\\cluster\\jpassword 269C.odem",
 		"data\\cluster\\jml 270C.odem",
-		"data\\cluster\\notepad_full 299C.odem",*/
+		"data\\cluster\\notepad_full 299C.odem",
 		/*"data\\cluster\\poormans 304C.odem",
 		"data\\cluster\\log4j 308C.odem",
 		"data\\cluster\\jtreeview 329C.odem",

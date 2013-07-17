@@ -213,7 +213,7 @@ public class HillClimbingClustering
 	 */
 	private double evaluate()
 	{
-		double fit = calculator.calculateModularizarionFactor();
+		double fit = calculator.calculateModularizarionQuality();
 
 		if (++evaluations % 10000 == 0 && detailsFile != null)
 			detailsFile.println(evaluations + "; " + fitness);
