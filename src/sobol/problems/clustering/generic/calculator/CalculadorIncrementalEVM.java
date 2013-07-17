@@ -154,10 +154,13 @@ public class CalculadorIncrementalEVM implements ICalculadorIncremental
 			
 			for (int j = 0; (classIndex = classAssociations[i][j]) >= 0; j++)
 			{
-				int targetPackage = newPackage[classIndex];
+				if (classIndex > i)
+				{
+					int targetPackage = newPackage[classIndex];
 				
-				if (targetPackage == sourcePackage)
-					packageIntraEdges[sourcePackage]++;
+					if (targetPackage == sourcePackage)
+						packageIntraEdges[sourcePackage]++;
+				}
 			}
 		}
 	}
@@ -240,8 +243,8 @@ public class CalculadorIncrementalEVM implements ICalculadorIncremental
 		for (int i = 0; i < packageCount; i++)
 		{
 			int nc = packageClassCount[i];
-			int nl = packageIntraEdges[i] / 2;
-			result += 4 * nl - nc * (nc - 1);
+			int nl = packageIntraEdges[i];
+			result += 2 * nl - nc * (nc - 1) / 2;
 		}
 		
 		return result;
