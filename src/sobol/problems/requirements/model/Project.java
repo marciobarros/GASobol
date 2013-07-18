@@ -1,5 +1,6 @@
 package sobol.problems.requirements.model;
 
+
 /**
  * Class that represents the next-release problem
  * 
@@ -283,5 +284,30 @@ public class Project
 				sum += customerProfits[i];
 		
 		return sum;
+	}
+	
+	public int getCustomerRequirementsCount(int customerIndex)
+	{
+		return customerRequirements[customerIndex].length;
+	}
+
+	public int getCustomerRequirementIndex(int customerIndex, int index)
+	{
+		return customerRequirements[customerIndex][index];
+	}
+
+	public boolean requirementHasPrecedents(int requirementIndex)
+	{
+		return requirementDependencySources[requirementIndex] != null;
+	}
+
+	public int getRequirementPrecedentsCount(int requirementIndex)
+	{
+		return requirementDependencySources[requirementIndex].length;
+	}
+
+	public int getRequirementPrecedentIndex(int requirementIndex, int index)
+	{
+		return requirementDependencySources[requirementIndex][index];
 	}
 }

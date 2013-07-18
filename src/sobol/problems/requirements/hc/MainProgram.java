@@ -13,9 +13,10 @@ import sobol.base.random.sobol.SobolRandomGeneratorFactory;
 import sobol.problems.requirements.model.Project;
 import sobol.problems.requirements.reader.RequirementReader;
 
-@SuppressWarnings("unused")
 public class MainProgram
 {
+	private static int CICLOS = 100;
+	
 	private static String[] instanceFilenamesClassic =
 	{
 		"data\\requirements\\classic\\nrp1.txt",
@@ -28,7 +29,7 @@ public class MainProgram
 	
 	private static String[] instanceFilenamesRealistic =
 	{
-		"data\\requirements\\realistic\\nrp-e1.txt",
+		/*"data\\requirements\\realistic\\nrp-e1.txt",
 		"data\\requirements\\realistic\\nrp-e2.txt",
 		"data\\requirements\\realistic\\nrp-e3.txt",
 		"data\\requirements\\realistic\\nrp-e4.txt",
@@ -39,7 +40,7 @@ public class MainProgram
 		"data\\requirements\\realistic\\nrp-m1.txt",
 		"data\\requirements\\realistic\\nrp-m2.txt",
 		"data\\requirements\\realistic\\nrp-m3.txt",
-		"data\\requirements\\realistic\\nrp-m4.txt",
+		"data\\requirements\\realistic\\nrp-m4.txt",*/
 		""
 	};
 	
@@ -65,7 +66,7 @@ public class MainProgram
 		for (int i = 0; i < cycles; i++)
 		{
 			int budget = (int)(budgetFactor * instance.getTotalCost());
-			HillClimbingRequirements hcr = new HillClimbingRequirements(details, instance, budget, 10000000);
+			HillClimbing hcr = new HillClimbing(details, instance, budget, 10000000);
 			
 			long initTime = System.currentTimeMillis();
 			details.println(tipo + " " + instance.getName() + " #" + cycles);
@@ -95,25 +96,25 @@ public class MainProgram
 		
 		for (Project instance : instances)
 		{
-			/*RandomGeneratorFactory.setRandomFactoryForPopulation(new PseudoRandomGeneratorFactory());
-			mp.runInstance(out, details, "PSEUDO", instance, 30, 0.3);
-			mp.runInstance(out, details, "PSEUDO", instance, 30, 0.5);
-			mp.runInstance(out, details, "PSEUDO", instance, 30, 0.7);*/
+			RandomGeneratorFactory.setRandomFactoryForPopulation(new PseudoRandomGeneratorFactory());
+			mp.runInstance(out, details, "PSEUDO", instance, CICLOS, 0.3);
+			mp.runInstance(out, details, "PSEUDO", instance, CICLOS, 0.5);
+			mp.runInstance(out, details, "PSEUDO", instance, CICLOS, 0.7);
 
 			RandomGeneratorFactory.setRandomFactoryForPopulation(new SobolRandomGeneratorFactory());
-			mp.runInstance(out, details, "SOBOL", instance, 1, 0.3);
-			mp.runInstance(out, details, "SOBOL", instance, 1, 0.5);
-			mp.runInstance(out, details, "SOBOL", instance, 1, 0.7);
+			mp.runInstance(out, details, "SOBOL", instance, CICLOS, 0.3);
+			mp.runInstance(out, details, "SOBOL", instance, CICLOS, 0.5);
+			mp.runInstance(out, details, "SOBOL", instance, CICLOS, 0.7);
 			
 			RandomGeneratorFactory.setRandomFactoryForPopulation(new HaltonRandomGeneratorFactory());
-			mp.runInstance(out, details, "HALTON", instance, 1, 0.3);
-			mp.runInstance(out, details, "HALTON", instance, 1, 0.5);
-			mp.runInstance(out, details, "HALTON", instance, 1, 0.7);
+			mp.runInstance(out, details, "HALTON", instance, CICLOS, 0.3);
+			mp.runInstance(out, details, "HALTON", instance, CICLOS, 0.5);
+			mp.runInstance(out, details, "HALTON", instance, CICLOS, 0.7);
 
 			RandomGeneratorFactory.setRandomFactoryForPopulation(new FaureRandomGeneratorFactory());
-			mp.runInstance(out, details, "FAURE", instance, 1, 0.3);
-			mp.runInstance(out, details, "FAURE", instance, 1, 0.5);
-			mp.runInstance(out, details, "FAURE", instance, 1, 0.7);
+			mp.runInstance(out, details, "FAURE", instance, CICLOS, 0.3);
+			mp.runInstance(out, details, "FAURE", instance, CICLOS, 0.5);
+			mp.runInstance(out, details, "FAURE", instance, CICLOS, 0.7);
 		}
 		
 		out.close();

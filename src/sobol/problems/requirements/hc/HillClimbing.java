@@ -11,7 +11,7 @@ import sobol.problems.requirements.model.Project;
  * 
  * @author Marcio Barros
  */
-public class HillClimbingRequirements
+public class HillClimbing
 {
 	/**
 	 * Order under which requirements will be accessed
@@ -66,7 +66,7 @@ public class HillClimbingRequirements
 	/**
 	 * Initializes the Hill Climbing search process
 	 */
-	public HillClimbingRequirements(PrintWriter detailsFile, Project project, int budget, int maxEvaluations) throws Exception
+	public HillClimbing(PrintWriter detailsFile, Project project, int budget, int maxEvaluations) throws Exception
 	{
 		this.project = project;
 		this.availableBudget = budget; 
@@ -85,10 +85,10 @@ public class HillClimbingRequirements
 	 */
 	protected void createDefaultSelectionOrder(Project project)
 	{
-		int reqCount = project.getRequirementCount();
-		this.selectionOrder = new int[reqCount];
+		int customerCount = project.getCustomerCount();
+		this.selectionOrder = new int[customerCount];
 		
-		for (int i = 0; i < reqCount; i++)
+		for (int i = 0; i < customerCount; i++)
 			this.selectionOrder[i] = i;
 	}	
 
@@ -97,31 +97,31 @@ public class HillClimbingRequirements
 	 */
 	protected void createRandomSelectionOrder(Project project)
 	{
-		int reqCount = project.getRequirementCount();
-		int[] temporaryOrder = new int[reqCount];
+		int customerCount = project.getCustomerCount();
+		int[] temporaryOrder = new int[customerCount];
 		
-		for (int i = 0; i < reqCount; i++)
+		for (int i = 0; i < customerCount; i++)
 			temporaryOrder[i] = i;
 
-		this.selectionOrder = new int[reqCount];
+		this.selectionOrder = new int[customerCount];
 		PseudoRandomGeneratorFactory factory = new PseudoRandomGeneratorFactory();
-		AbstractRandomGenerator generator = factory.create(reqCount);
+		AbstractRandomGenerator generator = factory.create(customerCount);
 		double[] random = generator.randDouble();
 		
-		for (int i = 0; i < reqCount; i++)
+		for (int i = 0; i < customerCount; i++)
 		{
-			int index = (int)(random[i] * (reqCount - i));
+			int index = (int)(random[i] * (customerCount - i));
 			this.selectionOrder[i] = temporaryOrder[index];
 			
-			for (int j = index; j < reqCount-1; j++)
+			for (int j = index; j < customerCount-1; j++)
 				temporaryOrder[j] = temporaryOrder[j+1];
 		}
 		
-		for (int i = 0; i < reqCount; i++)
+		for (int i = 0; i < customerCount; i++)
 		{
 			boolean achou = false;
 			
-			for (int j = 0; j < reqCount && !achou; j++)
+			for (int j = 0; j < customerCount && !achou; j++)
 				if (this.selectionOrder[j] == i)
 					achou = true;
 			
@@ -189,19 +189,19 @@ public class HillClimbingRequirements
 	/**
 	 * Evaluates the fitness of a solution, saving detail information
 	 */
-	private double evaluate(boolean[] solution)
+	private double evaluate(Solution solution)
 	{
 		if (++evaluations % 10000 == 0 && detailsFile != null)
 			detailsFile.println(evaluations + "; " + fitness);
 
-		int cost = project.calculateCost(solution);
-		return (cost <= availableBudget) ? project.calculateProfit(solution) : -cost;
+		int cost = solution.getCost();
+		return (cost <= availableBudget) ? solution.getProfit() : -cost;
 	}
 
 	/**
 	 * Runs a neighborhood visit starting from a given solution
 	 */
-	private NeighborhoodVisitorResult visitNeighbors(boolean[] solution)
+	private NeighborhoodVisitorResult visitNeighbors(Solution solution)
 	{
 		double startingFitness = evaluate(solution);
 
@@ -211,13 +211,14 @@ public class HillClimbingRequirements
 		if (startingFitness > fitness)
 			return new NeighborhoodVisitorResult(NeighborhoodVisitorStatus.FOUND_BETTER_NEIGHBOR, startingFitness);
 		
-		int len = solution.length;
+		int len = project.getCustomerCount();
 		
 		for (int i = 0; i < len; i++)
 		{
-			int moduloI = selectionOrder[i];
+			int customerI = selectionOrder[i];
 
-			solution[moduloI] = !solution[moduloI];
+			solution.flipCustomer(customerI);
+			//solution[moduloI] = !solution[moduloI];
 			double neighborFitness = evaluate(solution);
 
 			if (evaluations > maxEvaluations)
@@ -226,7 +227,8 @@ public class HillClimbingRequirements
 			if (neighborFitness > startingFitness)
 				return new NeighborhoodVisitorResult(NeighborhoodVisitorStatus.FOUND_BETTER_NEIGHBOR, neighborFitness);
 
-			solution[moduloI] = !solution[moduloI];
+			solution.flipCustomer(customerI);
+			//solution[moduloI] = !solution[moduloI];
 		}
 
 		return new NeighborhoodVisitorResult(NeighborhoodVisitorStatus.NO_BETTER_NEIGHBOR);
@@ -238,10 +240,12 @@ public class HillClimbingRequirements
 	private boolean localSearch(boolean[] solution)
 	{
 		NeighborhoodVisitorResult result;
+		Solution hcrs = new Solution(project);
+		hcrs.setAllCustomers(solution);
 		
 		do
 		{
-			result = visitNeighbors(solution);
+			result = visitNeighbors(hcrs);
 			
 			if (result.getStatus() == NeighborhoodVisitorStatus.FOUND_BETTER_NEIGHBOR && result.getNeighborFitness() > fitness)
 			{
@@ -279,7 +283,9 @@ public class HillClimbingRequirements
 		AbstractRandomGenerator random = RandomGeneratorFactory.createForPopulation(customerCount);
 
 		this.bestSolution = createRandomSolution(random);
-		this.fitness = evaluate(bestSolution);
+		Solution hcrs = new Solution(project);
+		hcrs.setAllCustomers(bestSolution);
+		this.fitness = evaluate(hcrs);
 
 		boolean[] solution = new boolean[customerCount];
 		copySolution(bestSolution, solution);

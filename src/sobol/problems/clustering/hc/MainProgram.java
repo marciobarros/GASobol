@@ -1,18 +1,29 @@
 package sobol.problems.clustering.hc;
 
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Vector;
 import javax.management.modelmbean.XMLParseException;
 import sobol.base.random.RandomGeneratorFactory;
+import sobol.base.random.faure.FaureRandomGeneratorFactory;
+import sobol.base.random.generic.AbstractRandomGeneratorFactory;
+import sobol.base.random.halton.HaltonRandomGeneratorFactory;
+import sobol.base.random.pseudo.PseudoRandomGeneratorFactory;
 import sobol.base.random.sobol.SobolRandomGeneratorFactory;
 import sobol.problems.clustering.generic.calculator.CalculadorIncrementalEVM;
+import sobol.problems.clustering.generic.calculator.CalculadorIncrementalMQ;
 import sobol.problems.clustering.generic.calculator.ICalculadorIncremental;
 import sobol.problems.clustering.generic.model.Project;
 import sobol.problems.clustering.generic.reader.CDAReader;
 
+@SuppressWarnings("unused")
 public class MainProgram
 {
+	private static int CICLOS = 100;
+
+	private static int POPULATION_SIZE = 2000;
+	
 	private static String[] instanceFilenamesReals =
 	{
 		"data\\cluster\\jodamoney 26C.odem",
@@ -96,10 +107,58 @@ public class MainProgram
 			
 			String s = tipo + "; " + instance.getName() + " #" + i + "; " + executionTime + "; " + hcc.getFitness() + "; " + hcc.getRandomRestarts() + "; " + hcc.getRandomRestartBestFound() + "; " + hcc.printSolution(solution);
 			System.out.println(s);
+			
 			out.println(s);
+			out.flush();
 		}
 	}
 	
+	private void runInstanceGroupMQ(Vector<Project> instances, String randomType, AbstractRandomGeneratorFactory randomFactory) throws IOException, Exception
+	{
+		FileWriter outFile = new FileWriter("saida mq " + randomType.toLowerCase() + ".txt");
+		PrintWriter out = new PrintWriter(outFile);
+		
+		FileWriter detailsFile = new FileWriter("saida mq " + randomType.toLowerCase() + " details.txt");
+		PrintWriter details = new PrintWriter(detailsFile);
+		
+		for (int i = 0; i < instances.size(); i++)
+		{
+			Project projeto = instances.elementAt(i);
+			RandomGeneratorFactory.setRandomFactoryForPopulation(randomFactory);
+			ICalculadorIncremental calculador = new CalculadorIncrementalMQ(projeto, projeto.getClassCount());
+			runInstance(out, details, calculador, randomType, projeto, CICLOS, POPULATION_SIZE);
+		}
+
+		out.close();
+		outFile.close();
+		
+		details.close();
+		detailsFile.close();
+	}
+	
+	private void runInstanceGroupEVM(Vector<Project> instances, String randomType, AbstractRandomGeneratorFactory randomFactory) throws IOException, Exception
+	{
+		FileWriter outFile = new FileWriter("saida evm " + randomType.toLowerCase() + ".txt");
+		PrintWriter out = new PrintWriter(outFile);
+		
+		FileWriter detailsFile = new FileWriter("saida evm " + randomType.toLowerCase() + " details.txt");
+		PrintWriter details = new PrintWriter(detailsFile);
+		
+		for (int i = 0; i < instances.size(); i++)
+		{
+			Project projeto = instances.elementAt(i);
+			RandomGeneratorFactory.setRandomFactoryForPopulation(randomFactory);
+			ICalculadorIncremental calculador = new CalculadorIncrementalEVM(projeto, projeto.getClassCount());
+			runInstance(out, details, calculador, randomType, projeto, CICLOS, POPULATION_SIZE);
+		}
+
+		out.close();
+		outFile.close();
+		
+		details.close();
+		detailsFile.close();
+	}
+
 	public static final void main(String[] args) throws Exception
 	{
 		MainProgram mp = new MainProgram();
@@ -107,20 +166,9 @@ public class MainProgram
 		Vector<Project> instances = new Vector<Project>();
 		instances.addAll(mp.readInstances(instanceFilenamesReals));
 		
-		FileWriter outFile = new FileWriter("saida.txt");
-		PrintWriter out = new PrintWriter(outFile);
-		
-		FileWriter detailsFile = new FileWriter("saida details.txt");
-		PrintWriter details = new PrintWriter(detailsFile);
-		
-		for (int i = 0; i < instances.size(); i++)
-		{
-			Project projeto = instances.elementAt(i);
-			ICalculadorIncremental calculador = new CalculadorIncrementalEVM(projeto, projeto.getClassCount());
-			RandomGeneratorFactory.setRandomFactoryForPopulation(new SobolRandomGeneratorFactory());
-			mp.runInstance(out, details, calculador, "SOBOL", projeto, 1, 2000);
-		}
-		
-		out.close();
+		mp.runInstanceGroupMQ(instances, "SOBOL", new SobolRandomGeneratorFactory());
+		mp.runInstanceGroupMQ(instances, "FAURE", new FaureRandomGeneratorFactory());
+		mp.runInstanceGroupMQ(instances, "HALTON", new HaltonRandomGeneratorFactory());
+		mp.runInstanceGroupMQ(instances, "PSEUDO", new PseudoRandomGeneratorFactory());		
 	}
 }
