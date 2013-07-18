@@ -85,7 +85,7 @@ public class MainProgram
 
 		Vector<Project> instances = new Vector<Project>();
 		instances.addAll(mp.readInstances(instanceFilenamesClassic));
-		//instances.addAll(mp.readInstances(instanceFilenamesRealistic));
+		instances.addAll(mp.readInstances(instanceFilenamesRealistic));
 		
 		FileWriter outFile = new FileWriter("saida.txt");
 		PrintWriter out = new PrintWriter(outFile);
@@ -95,10 +95,10 @@ public class MainProgram
 		
 		for (Project instance : instances)
 		{
-			RandomGeneratorFactory.setRandomFactoryForPopulation(new PseudoRandomGeneratorFactory());
-			mp.runInstance(out, details, "PSEUDO", instance, 100, 0.3);
-			mp.runInstance(out, details, "PSEUDO", instance, 100, 0.5);
-			mp.runInstance(out, details, "PSEUDO", instance, 100, 0.7);
+			/*RandomGeneratorFactory.setRandomFactoryForPopulation(new PseudoRandomGeneratorFactory());
+			mp.runInstance(out, details, "PSEUDO", instance, 30, 0.3);
+			mp.runInstance(out, details, "PSEUDO", instance, 30, 0.5);
+			mp.runInstance(out, details, "PSEUDO", instance, 30, 0.7);*/
 
 			RandomGeneratorFactory.setRandomFactoryForPopulation(new SobolRandomGeneratorFactory());
 			mp.runInstance(out, details, "SOBOL", instance, 1, 0.3);

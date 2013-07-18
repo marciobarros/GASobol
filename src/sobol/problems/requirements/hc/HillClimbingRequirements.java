@@ -3,6 +3,7 @@ package sobol.problems.requirements.hc;
 import java.io.PrintWriter;
 import sobol.base.random.RandomGeneratorFactory;
 import sobol.base.random.generic.AbstractRandomGenerator;
+import sobol.base.random.pseudo.PseudoRandomGeneratorFactory;
 import sobol.problems.requirements.model.Project;
 
 /**
@@ -12,6 +13,11 @@ import sobol.problems.requirements.model.Project;
  */
 public class HillClimbingRequirements
 {
+	/**
+	 * Order under which requirements will be accessed
+	 */
+	private int[] selectionOrder;	
+	
 	/**
 	 * Best solution found by the Hill Climbing search
 	 */
@@ -69,7 +75,60 @@ public class HillClimbingRequirements
 		this.evaluations = 0;
 		this.randomRestartCount = 0;
 		this.restartBestFound = 0;
+		
+		createDefaultSelectionOrder(project);
+		//createRandomSelectionOrder(project);
 	}
+
+	/**
+	 * Gera a ordem default de seleção dos requisitos
+	 */
+	protected void createDefaultSelectionOrder(Project project)
+	{
+		int reqCount = project.getRequirementCount();
+		this.selectionOrder = new int[reqCount];
+		
+		for (int i = 0; i < reqCount; i++)
+			this.selectionOrder[i] = i;
+	}	
+
+	/**
+	 * Gera uma ordem aleatória de seleção dos requisitos
+	 */
+	protected void createRandomSelectionOrder(Project project)
+	{
+		int reqCount = project.getRequirementCount();
+		int[] temporaryOrder = new int[reqCount];
+		
+		for (int i = 0; i < reqCount; i++)
+			temporaryOrder[i] = i;
+
+		this.selectionOrder = new int[reqCount];
+		PseudoRandomGeneratorFactory factory = new PseudoRandomGeneratorFactory();
+		AbstractRandomGenerator generator = factory.create(reqCount);
+		double[] random = generator.randDouble();
+		
+		for (int i = 0; i < reqCount; i++)
+		{
+			int index = (int)(random[i] * (reqCount - i));
+			this.selectionOrder[i] = temporaryOrder[index];
+			
+			for (int j = index; j < reqCount-1; j++)
+				temporaryOrder[j] = temporaryOrder[j+1];
+		}
+		
+		for (int i = 0; i < reqCount; i++)
+		{
+			boolean achou = false;
+			
+			for (int j = 0; j < reqCount && !achou; j++)
+				if (this.selectionOrder[j] == i)
+					achou = true;
+			
+			if (!achou)
+				System.out.println("ERRO DE GERACAO DE INICIO ALEATORIO");
+		}
+	}	
 
 	/**
 	 * Returns the number of random restarts executed during the search process
@@ -156,7 +215,9 @@ public class HillClimbingRequirements
 		
 		for (int i = 0; i < len; i++)
 		{
-			solution[i] = !solution[i];
+			int moduloI = selectionOrder[i];
+
+			solution[moduloI] = !solution[moduloI];
 			double neighborFitness = evaluate(solution);
 
 			if (evaluations > maxEvaluations)
@@ -165,7 +226,7 @@ public class HillClimbingRequirements
 			if (neighborFitness > startingFitness)
 				return new NeighborhoodVisitorResult(NeighborhoodVisitorStatus.FOUND_BETTER_NEIGHBOR, neighborFitness);
 
-			solution[i] = !solution[i];
+			solution[moduloI] = !solution[moduloI];
 		}
 
 		return new NeighborhoodVisitorResult(NeighborhoodVisitorStatus.NO_BETTER_NEIGHBOR);
