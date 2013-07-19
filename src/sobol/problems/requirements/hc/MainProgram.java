@@ -15,7 +15,7 @@ import sobol.problems.requirements.reader.RequirementReader;
 
 public class MainProgram
 {
-	private static int CICLOS = 100;
+	private static int CICLOS = 1;
 	
 	private static String[] instanceFilenamesClassic =
 	{

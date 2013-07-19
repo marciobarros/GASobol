@@ -76,8 +76,8 @@ public class HillClimbing
 		this.randomRestartCount = 0;
 		this.restartBestFound = 0;
 		
-		createDefaultSelectionOrder(project);
-		//createRandomSelectionOrder(project);
+		//createDefaultSelectionOrder(project);
+		createRandomSelectionOrder(project);
 	}
 
 	/**
@@ -249,7 +249,7 @@ public class HillClimbing
 			
 			if (result.getStatus() == NeighborhoodVisitorStatus.FOUND_BETTER_NEIGHBOR && result.getNeighborFitness() > fitness)
 			{
-				copySolution(solution, bestSolution);
+				copySolution(hcrs.getSolution(), bestSolution);
 				this.fitness = result.getNeighborFitness();
 				this.restartBestFound = randomRestartCount;
 			}
