@@ -64,6 +64,11 @@ public class HillClimbing
 	private int evaluations;
 
 	/**
+	 * Object that represents a solution
+	 */
+        private Solution hcrs;
+
+	/**
 	 * Initializes the Hill Climbing search process
 	 */
 	public HillClimbing(PrintWriter detailsFile, Project project, int budget, int maxEvaluations) throws Exception
@@ -240,7 +245,6 @@ public class HillClimbing
 	private boolean localSearch(boolean[] solution)
 	{
 		NeighborhoodVisitorResult result;
-		Solution hcrs = new Solution(project);
 		hcrs.setAllCustomers(solution);
 		
 		do
@@ -283,7 +287,7 @@ public class HillClimbing
 		AbstractRandomGenerator random = RandomGeneratorFactory.createForPopulation(customerCount);
 
 		this.bestSolution = createRandomSolution(random);
-		Solution hcrs = new Solution(project);
+        hcrs = new Solution(project);
 		hcrs.setAllCustomers(bestSolution);
 		this.fitness = evaluate(hcrs);
 
